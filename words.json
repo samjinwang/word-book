@@ -1,5 +1,5 @@
 {
-  "1일차 (1)": [
+  "2페이지": [
     { "en": "keen", "ko": "예리한" },
     { "en": "bookkeeper", "ko": "회계 장부 담당자" },
     { "en": "difficulties", "ko": "곤란, 말썽" },
@@ -51,7 +51,7 @@
     { "en": "excess", "ko": "과잉의" },
     { "en": "improved", "ko": "개선된" }
   ],
-  "1일차 (2)": [
+  "3페이지": [
     { "en": "undertake", "ko": "착수하다" },
     { "en": "keep pace with", "ko": "~에 뒤지지 않다" },
     { "en": "research", "ko": "연구" },
@@ -103,7 +103,7 @@
     { "en": "be subject to", "ko": "~의 대상이다" },
     { "en": "confirm", "ko": "확인하다, 확정짓다" }
   ],
-  "2일차 (1)": [
+  "4페이지": [
     { "en": "tenant", "ko": "세입자, 주민" },
     { "en": "postpone", "ko": "연기하다, 뒤로 미루다" },
     { "en": "renovate", "ko": "수리하다" },
@@ -155,7 +155,7 @@
     { "en": "objectionable", "ko": "불쾌한, 무례한" },
     { "en": "suggestive", "ko": "~을 연상시키는" }
   ],
-  "2일차 (2)": [
+  "5페이지": [
     { "en": "complaint", "ko": "불평, 불만" },
     { "en": "in response to", "ko": "~에 대응하여" },
     { "en": "operating", "ko": "운영상의" },
@@ -207,7 +207,7 @@
     { "en": "competitively", "ko": "경쟁적으로" },
     { "en": "elaborate", "ko": "정교한, 공을 들인" }
   ],
-  "3일차 (1)": [
+  "6페이지": [
     { "en": "overhaul", "ko": "점검하다" },
     { "en": "achieve", "ko": "이루다, 성취하다" },
     { "en": "favorable", "ko": "좋은, 호의적인" },
@@ -259,7 +259,7 @@
     { "en": "crop", "ko": "농작물" },
     { "en": "retailer", "ko": "소매상, 소매업자" }
   ],
-  "3일차 (2)": [
+  "7페이지": [
     { "en": "suggest", "ko": "암시하다, 시사하다" },
     { "en": "tuition fee", "ko": "수업료" },
     { "en": "struggle", "ko": "애쓰다, 발버둥 치다" },
@@ -311,7 +311,7 @@
     { "en": "work", "ko": "일, 수고" },
     { "en": "order", "ko": "주문" }
   ],
-  "4일차 (1)": [
+  "8페이지": [
     { "en": "clearly", "ko": "명확하게, 분명하게" },
     { "en": "package", "ko": "소포, 포장" },
     { "en": "hasten", "ko": "서두르다" },
@@ -363,7 +363,7 @@
     { "en": "come up with", "ko": "~을 제시하다" },
     { "en": "leak", "ko": "새어 나오다, 새다" }
   ],
-  "4일차 (2)": [
+  "9페이지": [
     { "en": "philanthropic", "ko": "박애주의의" },
     { "en": "authorize", "ko": "허가하다, 인가하다" },
     { "en": "heavy industries", "ko": "중공업" },
