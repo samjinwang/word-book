@@ -10,22 +10,42 @@
 
     header {
       position: sticky; top: 0; background: #ffffff; border-bottom: 1px solid #e2e4e9;
-      display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; z-index: 100;
+      min-height: 52px;
     }
-    .header-btn { background: none; border: none; font-size: 15px; font-weight: 600; color: #007aff; cursor: pointer; }
-    #header-title { font-size: 17px; font-weight: 700; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .header-btn {
+      background: none; border: none; font-size: 14px; font-weight: 600; color: #007aff; cursor: pointer;
+      padding: 4px 6px; border-radius: 6px;
+    }
+    .header-btn.active { background: #007aff; color: #ffffff; }
+    #header-title { font-size: 16px; font-weight: 700; text-align: center; flex: 1; margin: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* 메뉴 선택 화면 */
-    #page-selection-view { padding: 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    /* 메인 선택 화면 */
+    #page-selection-view { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    
+    /* 별표 모아보기 특별 버튼 */
+    .all-starred-btn {
+      background: linear-gradient(135deg, #ff9500, #ff5e3a); color: #ffffff;
+      border: none; border-radius: 14px; padding: 18px 16px; font-size: 16px; font-weight: 700;
+      display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+      box-shadow: 0 4px 10px rgba(255, 149, 0, 0.25);
+    }
+    .all-starred-btn span.badge {
+      background: rgba(255, 255, 255, 0.3); padding: 4px 10px; border-radius: 20px; font-size: 13px;
+    }
+
+    /* 페이지별 그리드 */
+    .page-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .page-btn {
-      background: #ffffff; border: 1px solid #dcdfe6; border-radius: 14px; padding: 22px 12px;
-      font-size: 16px; font-weight: 700; color: #1c1c1e; cursor: pointer;
+      background: #ffffff; border: 1px solid #dcdfe6; border-radius: 14px; padding: 20px 12px;
+      font-size: 15px; font-weight: 700; color: #1c1c1e; cursor: pointer;
       box-shadow: 0 2px 5px rgba(0,0,0,0.03); display: flex; flex-direction: column; align-items: center; gap: 6px;
     }
     .page-btn span.count { font-size: 12px; font-weight: 500; color: #8e8e93; }
 
     /* 단어 카드 화면 */
-    #word-study-view { display: none; padding: 16px; flex-direction: column; align-items: center; gap: 14px; }
+    #word-study-view { display: none; padding: 16px; flex-direction: column; align-items: center; gap: 14px; min-height: 80vh; }
     .card-container { width: 100%; max-width: 400px; height: 150px; perspective: 1000px; }
     
     .card {
@@ -41,9 +61,19 @@
       padding: 16px; text-align: center; border: 1px solid #e5e5ea;
     }
 
+    /* 별표 토글 아이콘 */
+    .star-icon {
+      position: absolute; top: 12px; right: 14px; font-size: 24px; line-height: 1;
+      cursor: pointer; user-select: none; z-index: 10;
+    }
+    .card-front .star-icon { color: #d1d1d6; }
+    .card-front .star-icon.starred { color: #ff9500; }
+    .card-back .star-icon { color: rgba(255, 255, 255, 0.4); }
+    .card-back .star-icon.starred { color: #ffd60a; }
+
     /* 앞면: 영어 & 발음기호 */
     .card-front { background: #ffffff; color: #1c1c1e; }
-    .card-front .word { font-size: 23px; font-weight: 700; line-height: 1.3; }
+    .card-front .word { font-size: 22px; font-weight: 700; line-height: 1.3; }
     .card-front .pron { font-size: 14px; color: #8e8e93; margin-top: 6px; font-weight: normal; }
 
     /* 뒷면: 품사 & 한글 뜻 */
@@ -52,9 +82,11 @@
       display: inline-block; background: rgba(255, 255, 255, 0.22); color: #ffffff;
       padding: 3px 8px; border-radius: 6px; font-size: 13px; font-weight: 600; margin-bottom: 8px;
     }
-    .card-back .meaning { font-size: 19px; font-weight: 600; line-height: 1.4; word-break: keep-all; }
+    .card-back .meaning { font-size: 18px; font-weight: 600; line-height: 1.4; word-break: keep-all; }
 
-    #loading-msg { text-align: center; padding: 40px; font-size: 15px; color: #8e8e93; width: 100%; grid-column: span 2; }
+    /* 안내 메시지 */
+    .empty-msg { text-align: center; padding: 60px 20px; font-size: 15px; color: #8e8e93; }
+    #loading-msg { text-align: center; padding: 40px; font-size: 15px; color: #8e8e93; }
   </style>
 </head>
 <body>
@@ -62,24 +94,37 @@
   <header>
     <button id="back-btn" class="header-btn" style="display: none;" onclick="showPageList()">← 목록</button>
     <div id="header-title">단어장 선택</div>
-    <button id="shuffle-btn" class="header-btn" style="display: none;" onclick="shuffleCurrentWords()">셔플</button>
+    <div class="header-actions">
+      <button id="star-filter-btn" class="header-btn" style="display: none;" onclick="toggleStarFilter()">★만 보기</button>
+      <button id="shuffle-btn" class="header-btn" style="display: none;" onclick="shuffleCurrentWords()">셔플</button>
+    </div>
   </header>
 
+  <!-- 메인 메뉴 -->
   <main id="page-selection-view">
     <div id="loading-msg">단어 목록을 불러오는 중...</div>
   </main>
+
+  <!-- 단어 학습 카드 화면 -->
   <main id="word-study-view"></main>
 
   <script>
     let wordData = {};
     let currentPageKey = null;
-    let currentWords = [];
+    let baseWords = [];       // 현재 페이지(또는 모아보기)의 전체 단어 원본 순서
+    let displayWords = [];    // 현재 화면에 표시 중인 단어 목록
+    let isStarOnly = false;   // 별표 필터 활성화 여부
+    let isAllStarredMode = false; // 전체 별표 모아보기 모드 여부
+
+    // 로컬 스토리지에서 별표 상태 로드 (단어 고유 en 기준)
+    let starredSet = new Set(JSON.parse(localStorage.getItem('starred_words') || '[]'));
 
     const pageListView = document.getElementById("page-selection-view");
     const studyView = document.getElementById("word-study-view");
     const headerTitle = document.getElementById("header-title");
     const backBtn = document.getElementById("back-btn");
     const shuffleBtn = document.getElementById("shuffle-btn");
+    const starFilterBtn = document.getElementById("star-filter-btn");
 
     fetch('./words.json')
       .then(res => {
@@ -94,33 +139,104 @@
         pageListView.innerHTML = `<div id="loading-msg" style="color:#ff3b30;">words.json 파일을 불러오지 못했습니다.<br>경로와 내용을 확인해주세요.</div>`;
       });
 
+    // 별표 저장 함수
+    function saveStarred() {
+      localStorage.setItem('starred_words', JSON.stringify([...starredSet]));
+    }
+
+    // 메인 화면 렌더링
     function renderPageSelection() {
       pageListView.innerHTML = "";
+
+      // 1. 전체 별표 단어 계산
+      let totalStarredCount = 0;
+      Object.values(wordData).forEach(list => {
+        list.forEach(item => {
+          if (starredSet.has(item.en)) totalStarredCount++;
+        });
+      });
+
+      // 2. 최상단: 별표 친 단어 모두 모아보기 배너
+      const allStarredBtn = document.createElement("button");
+      allStarredBtn.className = "all-starred-btn";
+      allStarredBtn.innerHTML = `
+        <span>★ 별표 친 단어 모두 모아보기</span>
+        <span class="badge">${totalStarredCount}단어</span>
+      `;
+      allStarredBtn.onclick = () => loadAllStarred();
+      pageListView.appendChild(allStarredBtn);
+
+      // 3. 각 페이지 선택 그리드
+      const grid = document.createElement("div");
+      grid.className = "page-grid";
+
       Object.keys(wordData).forEach(pageKey => {
         const btn = document.createElement("button");
         btn.className = "page-btn";
         btn.innerHTML = `${pageKey} <span class="count">${wordData[pageKey].length}단어</span>`;
         btn.onclick = () => loadPage(pageKey);
-        pageListView.appendChild(btn);
+        grid.appendChild(btn);
       });
+
+      pageListView.appendChild(grid);
     }
 
+    // 일반 페이지 열기
     function loadPage(pageKey) {
       currentPageKey = pageKey;
-      currentWords = [...wordData[pageKey]];
+      isAllStarredMode = false;
+      isStarOnly = false;
+      baseWords = [...wordData[pageKey]];
+      displayWords = [...baseWords];
 
-      headerTitle.textContent = pageKey;
+      updateHeader(pageKey);
+      renderCards(displayWords);
+      window.scrollTo(0, 0);
+    }
+
+    // 모든 페이지의 별표 단어 모아보기
+    function loadAllStarred() {
+      currentPageKey = "별표 모아보기";
+      isAllStarredMode = true;
+      isStarOnly = true;
+
+      // 전체 페이지에서 별표된 단어들만 수집
+      baseWords = [];
+      Object.values(wordData).forEach(list => {
+        list.forEach(item => {
+          if (starredSet.has(item.en)) {
+            baseWords.push(item);
+          }
+        });
+      });
+      displayWords = [...baseWords];
+
+      updateHeader("★ 별표 모아보기");
+      starFilterBtn.style.display = "none"; // 모아보기에서는 필터 토글 버튼 숨김
+      renderCards(displayWords);
+      window.scrollTo(0, 0);
+    }
+
+    function updateHeader(title) {
+      headerTitle.textContent = title;
       pageListView.style.display = "none";
       studyView.style.display = "flex";
       backBtn.style.display = "block";
       shuffleBtn.style.display = "block";
-
-      renderCards(currentWords);
-      window.scrollTo(0, 0);
+      starFilterBtn.style.display = isAllStarredMode ? "none" : "block";
+      starFilterBtn.classList.remove("active");
+      starFilterBtn.textContent = "★만 보기";
     }
 
+    // 카드 렌더링
     function renderCards(words) {
       studyView.innerHTML = "";
+
+      if (words.length === 0) {
+        studyView.innerHTML = `<div class="empty-msg">별표 친 단어가 없습니다.</div>`;
+        return;
+      }
+
       words.forEach(item => {
         const container = document.createElement("div");
         container.className = "card-container";
@@ -129,18 +245,26 @@
         card.className = "card";
         card.onclick = () => card.classList.toggle("flipped");
 
-        // 앞면: 영어 + 발음기호
+        const isStarred = starredSet.has(item.en);
+
+        // 앞면
         const front = document.createElement("div");
         front.className = "card-face card-front";
         front.innerHTML = `
+          <div class="star-icon ${isStarred ? 'starred' : ''}" onclick="toggleStar(event, '${item.en}')">
+            ${isStarred ? '★' : '☆'}
+          </div>
           <div class="word">${item.en}</div>
           ${item.pron ? `<div class="pron">${item.pron}</div>` : ''}
         `;
 
-        // 뒷면: 품사 + 한글 뜻
+        // 뒷면
         const back = document.createElement("div");
         back.className = "card-face card-back";
         back.innerHTML = `
+          <div class="star-icon ${isStarred ? 'starred' : ''}" onclick="toggleStar(event, '${item.en}')">
+            ${isStarred ? '★' : '☆'}
+          </div>
           ${item.pos ? `<span class="pos-badge">${item.pos}</span>` : ''}
           <div class="meaning">${item.ko}</div>
         `;
@@ -152,22 +276,61 @@
       });
     }
 
-    function shuffleCurrentWords() {
-      for (let i = currentWords.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [currentWords[i], currentWords[j]] = [currentWords[j], currentWords[i]];
+    // 별표 토글 (이벤트 전파 방지로 카드 뒤집힘 방지)
+    function toggleStar(event, wordEn) {
+      event.stopPropagation();
+
+      if (starredSet.has(wordEn)) {
+        starredSet.delete(wordEn);
+      } else {
+        starredSet.add(wordEn);
       }
-      renderCards(currentWords);
+      saveStarred();
+
+      // 별표만 보기 상태일 때 별표를 해제하면 화면에서도 바로 제거
+      if (isStarOnly) {
+        displayWords = displayWords.filter(item => starredSet.has(item.en));
+        renderCards(displayWords);
+      } else {
+        renderCards(displayWords);
+      }
     }
 
+    // 페이지 내 별표만 따로보기 토글
+    function toggleStarFilter() {
+      isStarOnly = !isStarOnly;
+      if (isStarOnly) {
+        starFilterBtn.classList.add("active");
+        starFilterBtn.textContent = "전체보기";
+        displayWords = baseWords.filter(item => starredSet.has(item.en));
+      } else {
+        starFilterBtn.classList.remove("active");
+        starFilterBtn.textContent = "★만 보기";
+        displayWords = [...baseWords];
+      }
+      renderCards(displayWords);
+    }
+
+    // 셔플
+    function shuffleCurrentWords() {
+      for (let i = displayWords.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [displayWords[i], displayWords[j]] = [displayWords[j], displayWords[i]];
+      }
+      renderCards(displayWords);
+    }
+
+    // 목록으로 복귀
     function showPageList() {
       currentPageKey = null;
       headerTitle.textContent = "단어장 선택";
-      pageListView.style.display = "grid";
+      pageListView.style.display = "flex";
       studyView.style.display = "none";
       backBtn.style.display = "none";
       shuffleBtn.style.display = "none";
+      starFilterBtn.style.display = "none";
       studyView.innerHTML = "";
+      renderPageSelection(); // 별표 개수 배지 최신화
     }
   </script>
 </body>
