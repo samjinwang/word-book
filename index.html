@@ -8,7 +8,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f2f3f7; color: #333; }
 
-    /* 헤더 */
     header {
       position: sticky; top: 0; background: #ffffff; border-bottom: 1px solid #e0e0e0;
       display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; z-index: 100;
@@ -16,33 +15,34 @@
     .header-btn { background: none; border: none; font-size: 16px; font-weight: 600; color: #007aff; cursor: pointer; }
     #header-title { font-size: 17px; font-weight: 700; }
 
-    /* 페이지 선택 뷰 */
-    #page-selection-view { padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    #page-selection-view { padding: 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .page-btn {
-      background: #ffffff; border: 1px solid #ddd; border-radius: 14px; padding: 24px 16px;
-      font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      background: #ffffff; border: 1px solid #ddd; border-radius: 12px; padding: 20px 12px;
+      font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
     }
+    .page-btn span.count { font-size: 12px; font-weight: normal; color: #888; }
 
-    /* 단어 학습 뷰 */
-    #word-study-view { display: none; padding: 16px; flex-direction: column; align-items: center; gap: 16px; }
+    #word-study-view { display: none; padding: 16px; flex-direction: column; align-items: center; gap: 14px; }
     
-    /* 3D 플립 카드 스타일 */
     .card-container {
-      width: 100%; max-width: 380px; height: 160px; perspective: 1000px;
+      width: 100%; max-width: 380px; height: 140px; perspective: 1000px;
     }
     .card {
       width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
-      transition: transform 0.4s ease; border-radius: 16px; cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      transition: transform 0.35s ease; border-radius: 14px; cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.06);
     }
     .card.flipped { transform: rotateY(180deg); }
     .card-face {
       position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
-      border-radius: 16px; display: flex; align-items: center; justify-content: center;
-      padding: 20px; text-align: center; border: 1px solid #e5e5ea;
+      border-radius: 14px; display: flex; align-items: center; justify-content: center;
+      padding: 16px; text-align: center; border: 1px solid #e5e5ea;
     }
-    .card-front { background: #ffffff; color: #1c1c1e; font-size: 24px; font-weight: 700; }
-    .card-back { background: #007aff; color: #ffffff; font-size: 20px; font-weight: 600; transform: rotateY(180deg); }
+    .card-front { background: #ffffff; color: #1c1c1e; font-size: 21px; font-weight: 700; }
+    .card-back { background: #007aff; color: #ffffff; font-size: 18px; font-weight: 600; transform: rotateY(180deg); }
+
+    #loading-msg { text-align: center; padding: 40px; font-size: 15px; color: #666; width: 100%; grid-column: span 2; }
   </style>
 </head>
 <body>
@@ -53,66 +53,53 @@
     <button id="shuffle-btn" class="header-btn" style="display: none;" onclick="shuffleCurrentWords()">셔플</button>
   </header>
 
-  <!-- 메인: 단어장 페이지 리스트 -->
-  <main id="page-selection-view"></main>
-
-  <!-- 단어 학습 카드 스크롤 뷰 -->
+  <main id="page-selection-view">
+    <div id="loading-msg">단어 목록을 불러오는 중...</div>
+  </main>
   <main id="word-study-view"></main>
 
   <script>
-    // 1. 단어 데이터셋
-    const wordData = {
-      "1일차": [
-        { en: "keen", ko: "예리한" },
-        { en: "bookkeeper", ko: "회계 장부 담당자" },
-        { en: "difficulties", ko: "곤란, 말썽" },
-        { en: "causative", ko: "야기시키는" },
-        { en: "blackout", ko: "정전" },
-        { en: "unplug", ko: "플러그를 뽑다" },
-        { en: "affect", ko: "영향을 미치다" },
-        { en: "affected", ko: "영향을 받은" },
-        { en: "affection", ko: "감정, 감동" },
-        { en: "athletics", ko: "체육" },
-        { en: "reliable", ko: "믿을 만한" },
-        { en: "appreciative", ko: "감사하는" },
-        { en: "budget", ko: "예산, 비용" },
-        { en: "proposal", ko: "제안, 제의" },
-        { en: "equipment", ko: "장비, 용품" },
-        { en: "quite", ko: "상당히, 꽤" },
-        { en: "choice", ko: "선택(권)" },
-        { en: "reservation", ko: "예약" },
-        { en: "access", ko: "이용, 접근; 이용하다" }
-      ],
-      "2일차": [
-        { en: "example", ko: "예시" }
-      ]
-    };
-
+    let wordData = {};
     let currentPageKey = null;
     let currentWords = [];
 
-    // 초기 화면 생성
     const pageListView = document.getElementById("page-selection-view");
     const studyView = document.getElementById("word-study-view");
     const headerTitle = document.getElementById("header-title");
     const backBtn = document.getElementById("back-btn");
     const shuffleBtn = document.getElementById("shuffle-btn");
 
+    // words.json 비동기 로드
+    fetch('./words.json')
+      .then(res => {
+        if (!res.ok) throw new Error("네트워크 응답 오류");
+        return res.json();
+      })
+      .then(data => {
+        wordData = data;
+        renderPageSelection();
+      })
+      .catch(err => {
+        pageListView.innerHTML = `<div id="loading-msg" style="color:red;">words.json 파일을 불러오지 못했습니다.<br>경로와 JSON 형식을 확인해주세요.</div>`;
+      });
+
+    // 페이지 버튼 자동 생성
     function renderPageSelection() {
       pageListView.innerHTML = "";
-      Object.keys(wordData).forEach(pageKey => {
+      const pageKeys = Object.keys(wordData);
+
+      pageKeys.forEach(pageKey => {
         const btn = document.createElement("button");
         btn.className = "page-btn";
-        btn.textContent = pageKey;
+        btn.innerHTML = `${pageKey} <span class="count">${wordData[pageKey].length}단어</span>`;
         btn.onclick = () => loadPage(pageKey);
         pageListView.appendChild(btn);
       });
     }
 
-    // 특정 페이지 단어 불러오기 (원래 순서 보장)
     function loadPage(pageKey) {
       currentPageKey = pageKey;
-      currentWords = [...wordData[pageKey]]; // 원본 복사
+      currentWords = [...wordData[pageKey]];
 
       headerTitle.textContent = pageKey;
       pageListView.style.display = "none";
@@ -124,7 +111,6 @@
       window.scrollTo(0, 0);
     }
 
-    // 카드 렌더링
     function renderCards(words) {
       studyView.innerHTML = "";
       words.forEach(item => {
@@ -150,7 +136,6 @@
       });
     }
 
-    // 단어 셔플 (Fisher-Yates 알고리즘)
     function shuffleCurrentWords() {
       for (let i = currentWords.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -159,7 +144,6 @@
       renderCards(currentWords);
     }
 
-    // 페이지 목록으로 복귀 (원래 순서로 리셋)
     function showPageList() {
       currentPageKey = null;
       headerTitle.textContent = "단어장 선택";
@@ -169,8 +153,6 @@
       shuffleBtn.style.display = "none";
       studyView.innerHTML = "";
     }
-
-    renderPageSelection();
   </script>
 </body>
 </html>
