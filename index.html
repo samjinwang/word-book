@@ -14,8 +14,8 @@
     :root {
       --word-size: 38px;
       --meaning-size: 30px;
-      --both-word-size: 24px;
-      --both-meaning-size: 20px;
+      --both-word-size: 30px;
+      --both-meaning-size: 26px;
     }
 
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f6fa; color: #222; }
@@ -35,7 +35,6 @@
     }
     .header-actions::-webkit-scrollbar { display: none; }
     
-    /* 헤더 버튼 스타일 개선 및 간격 확보 */
     .header-btn {
       background: #f0f2f7; border: 1.5px solid #d5d9e2; font-size: 13.5px; font-weight: 700; color: #2c3038;
       cursor: pointer; padding: 8px 12px; border-radius: 10px; display: inline-flex; align-items: center;
@@ -46,13 +45,12 @@
     
     #back-btn { background: #f2f7ff; border-color: #c2daf8; color: #007aff; }
 
-    /* 글자 크기 조절 버튼 그룹 */
     .font-ctrl-group { display: inline-flex; gap: 4px; flex-shrink: 0; }
     .font-btn { padding: 8px 10px; font-size: 13px; }
 
     .header-btn.active {
-      background: #ff7b90; border-color: #f26279; color: #ffffff;
-      box-shadow: 0 2px 6px rgba(255, 123, 144, 0.35);
+      background: #e89da8; border-color: #d68793; color: #ffffff;
+      box-shadow: 0 2px 6px rgba(214, 135, 147, 0.35);
     }
 
     #header-title {
@@ -64,10 +62,10 @@
     #page-selection-view { padding: 18px 16px; display: flex; flex-direction: column; gap: 16px; }
     
     .all-starred-btn {
-      background: linear-gradient(135deg, #ff8da1, #ff6b8b); color: #ffffff;
+      background: linear-gradient(135deg, #f3abb5, #e5929f); color: #ffffff;
       border: none; border-radius: 16px; padding: 22px 18px; font-size: 20px; font-weight: 800;
       display: flex; justify-content: space-between; align-items: center; cursor: pointer;
-      box-shadow: 0 4px 14px rgba(255, 107, 139, 0.3); transition: transform 0.15s;
+      box-shadow: 0 4px 14px rgba(229, 146, 159, 0.3); transition: transform 0.15s;
     }
     .all-starred-btn:active { transform: scale(0.98); }
     .all-starred-btn span.badge {
@@ -81,70 +79,78 @@
       box-shadow: 0 3px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: center; gap: 8px;
       transition: transform 0.15s, border-color 0.15s;
     }
-    .page-btn:active { transform: scale(0.97); border-color: #ff7b90; }
+    .page-btn:active { transform: scale(0.97); border-color: #e5929f; }
     .page-btn span.count { font-size: 14px; font-weight: 600; color: #8a8e99; }
 
     /* 단어 학습 컨테이너 */
     #word-study-view { display: none; padding: 16px 8px; flex-direction: column; align-items: center; gap: 16px; min-height: 80vh; width: 100%; }
     
-    /* 1) 뒤집기(플립) 모드 컨테이너 */
-    .flip-container { width: 100%; max-width: 440px; height: 195px; perspective: 1000px; padding: 0 6px; }
+    /* 1) 뒤집기(플립) 컨테이너: 제자리 회전 보장 */
+    .flip-container {
+      width: 100%; max-width: 440px; height: 210px; perspective: 1000px; padding: 0 6px; position: relative;
+    }
     .card {
       width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
-      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 20px; cursor: pointer;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 20px; cursor: pointer;
       box-shadow: 0 6px 16px rgba(0,0,0,0.06);
     }
     .card.flipped { transform: rotateY(180deg); }
     
+    /* 카드 면 절대위치 고정 */
     .card-face {
-      position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; backface-visibility: hidden;
       border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 16px 20px; text-align: center; border: 1.5px solid #e1e4ec; position: relative;
+      padding: 18px 22px; text-align: center;
     }
 
-    /* 2) 단어+뜻 독립 2카드 나란히 배치 컨테이너 */
+    /* 2) 단어+뜻 모드: 독립 2카드 배치 */
     .both-row-container {
-      width: 100%; max-width: 760px; display: flex; gap: 8px; align-items: stretch; padding: 0 4px;
+      width: 100%; max-width: 820px; display: flex; gap: 10px; align-items: stretch; padding: 0 4px;
     }
     .side-card {
-      flex: 1; min-height: 180px; border-radius: 18px; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; padding: 14px 10px; text-align: center;
+      flex: 1; min-height: 200px; border-radius: 18px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 16px 12px; text-align: center;
       box-shadow: 0 4px 14px rgba(0,0,0,0.05); position: relative;
     }
 
-    /* 카드 내부 중앙정렬 콘텐츠 래퍼 */
-    .card-content-center {
-      display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;
+    /* 정중앙 고정 텍스트 래퍼 */
+    .center-text-anchor {
+      display: flex; align-items: center; justify-content: center; width: 100%; min-height: 70px;
     }
 
-    /* 영어 카드 (앞면 / 독립카드) */
+    /* 부가정보(발음기호/품사) 독립 배치 */
+    .card-extra-bottom {
+      position: absolute; bottom: 14px; left: 0; width: 100%; text-align: center; pointer-events: none;
+    }
+    .card-extra-top {
+      position: absolute; top: 14px; left: 0; width: 100%; text-align: center; pointer-events: none;
+    }
+
+    /* 영어 카드 (화이트 톤) */
     .eng-face { background: #ffffff; color: #1c1c1e; border: 1.5px solid #e1e4ec; }
     .eng-face .word { 
       font-size: var(--word-size); font-weight: 800; line-height: 1.15; word-break: break-word; letter-spacing: -0.5px;
     }
-    /* 발음기호 크기 확대 */
-    .eng-face .pron { font-size: 18px; color: #6e7380; margin-top: 8px; font-weight: 500; }
+    .eng-face .pron { font-size: 18px; color: #6e7380; font-weight: 500; }
 
-    /* 한글 카드 (뒷면 / 독립카드) - 부드러운 로즈/핑크 톤 */
+    /* 한글 카드 (눈이 편안한 소프트 로즈/베이지 핑크) */
     .kor-face {
-      background: linear-gradient(135deg, #ff8da1, #f97794); color: #ffffff;
-      border: 1.5px solid #ff758f;
+      background: #fdf2f4; color: #4a2d34; border: 1.5px solid #edd5da;
     }
     .card-back { transform: rotateY(180deg); }
     
-    /* 품사 배지 */
     .kor-face .pos-badge {
-      display: inline-block; background: rgba(255, 255, 255, 0.28); color: #ffffff;
-      padding: 3px 10px; border-radius: 8px; font-size: 15px; font-weight: 700; margin-bottom: 8px;
+      display: inline-block; background: #eed0d6; color: #6a3a44;
+      padding: 3px 10px; border-radius: 8px; font-size: 14px; font-weight: 700;
     }
     .kor-face .meaning { 
       font-size: var(--meaning-size); font-weight: 800; line-height: 1.25; word-break: keep-all; letter-spacing: -0.5px;
     }
 
-    /* 단어+뜻 모드에서의 폰트 크기 세밀 조정 */
+    /* 단어+뜻 모드에서의 글자 크기 (대폭 확대) */
     .side-card.eng-face .word { font-size: var(--both-word-size); }
-    .side-card.eng-face .pron { font-size: 16px; margin-top: 6px; }
-    .side-card.kor-face .pos-badge { font-size: 13px; padding: 2px 8px; margin-bottom: 6px; }
+    .side-card.eng-face .pron { font-size: 16px; }
+    .side-card.kor-face .pos-badge { font-size: 13px; padding: 2px 8px; }
     .side-card.kor-face .meaning { font-size: var(--both-meaning-size); }
 
     /* 별표 버튼 */
@@ -154,8 +160,8 @@
     }
     .eng-face .star-icon { color: #d0d4dd; }
     .eng-face .star-icon.starred { color: #ff9500; }
-    .kor-face .star-icon { color: rgba(255, 255, 255, 0.45); }
-    .kor-face .star-icon.starred { color: #fff382; text-shadow: 0 0 4px rgba(0,0,0,0.15); }
+    .kor-face .star-icon { color: #d8b8bf; }
+    .kor-face .star-icon.starred { color: #ff9500; }
 
     .empty-msg { text-align: center; padding: 70px 20px; font-size: 18px; font-weight: 600; color: #8e8e93; }
     #loading-msg { text-align: center; padding: 50px; font-size: 18px; font-weight: 600; color: #8e8e93; }
@@ -195,14 +201,14 @@
     let isAllStarredMode = false;
     let isBothMode = false;
 
-    // 단계별 글자 크기 정의
+    // 단계별 글자 크기 정의 (단어+뜻 모드 크기를 뒤집기 모드 수준으로 대폭 확대)
     const fontSizes = [
-      { word: "26px", meaning: "22px", bWord: "18px", bMeaning: "16px" },
-      { word: "32px", meaning: "26px", bWord: "21px", bMeaning: "18px" },
-      { word: "38px", meaning: "30px", bWord: "24px", bMeaning: "20px" }, // 기본
-      { word: "44px", meaning: "34px", bWord: "27px", bMeaning: "22px" },
-      { word: "50px", meaning: "38px", bWord: "30px", bMeaning: "24px" },
-      { word: "56px", meaning: "42px", bWord: "33px", bMeaning: "26px" }
+      { word: "26px", meaning: "22px", bWord: "22px", bMeaning: "19px" },
+      { word: "32px", meaning: "26px", bWord: "26px", bMeaning: "22px" },
+      { word: "38px", meaning: "30px", bWord: "31px", bMeaning: "26px" }, // 기본
+      { word: "45px", meaning: "35px", bWord: "37px", bMeaning: "31px" },
+      { word: "52px", meaning: "40px", bWord: "43px", bMeaning: "36px" },
+      { word: "60px", meaning: "46px", bWord: "49px", bMeaning: "41px" }
     ];
     let currentFontLevel = parseInt(localStorage.getItem('word_font_level') || '2', 10);
     let starredSet = new Set(JSON.parse(localStorage.getItem('starred_words') || '[]'));
@@ -371,18 +377,18 @@
             <div class="star-icon ${isStarred ? 'starred' : ''}" onclick="toggleStar(event, '${item.en}')">
               ${isStarred ? '★' : '☆'}
             </div>
-            <div class="card-content-center">
+            <div class="center-text-anchor">
               <div class="word">${item.en}</div>
-              ${item.pron ? `<div class="pron">${item.pron}</div>` : ''}
             </div>
+            ${item.pron ? `<div class="card-extra-bottom"><div class="pron">${item.pron}</div></div>` : ''}
           `;
 
-          // 오른쪽 한글 카드 (부드러운 로즈 핑크)
+          // 오른쪽 한글 카드 (소프트 로즈 톤)
           const rightCard = document.createElement("div");
           rightCard.className = "side-card kor-face";
           rightCard.innerHTML = `
-            <div class="card-content-center">
-              ${item.pos ? `<span class="pos-badge">${item.pos}</span>` : ''}
+            ${item.pos ? `<div class="card-extra-top"><span class="pos-badge">${item.pos}</span></div>` : ''}
+            <div class="center-text-anchor">
               <div class="meaning">${item.ko}</div>
             </div>
           `;
@@ -392,7 +398,7 @@
           studyView.appendChild(rowContainer);
 
         } else {
-          // [1] 뒤집기 모드: 터치 시 플립
+          // [1] 뒤집기 모드: 제자리 플립 카드
           const container = document.createElement("div");
           container.className = "flip-container";
 
@@ -400,28 +406,28 @@
           card.className = "card";
           card.onclick = () => card.classList.toggle("flipped");
 
-          // 앞면 (영어 & 발음기호 중앙정렬)
+          // 앞면 (영어 중앙정렬, 발음기호 하단 배치)
           const front = document.createElement("div");
-          front.className = "card-face eng-face";
+          front.className = "card-face eng-face card-front";
           front.innerHTML = `
             <div class="star-icon ${isStarred ? 'starred' : ''}" onclick="toggleStar(event, '${item.en}')">
               ${isStarred ? '★' : '☆'}
             </div>
-            <div class="card-content-center">
+            <div class="center-text-anchor">
               <div class="word">${item.en}</div>
-              ${item.pron ? `<div class="pron">${item.pron}</div>` : ''}
             </div>
+            ${item.pron ? `<div class="card-extra-bottom"><div class="pron">${item.pron}</div></div>` : ''}
           `;
 
-          // 뒷면 (품사 & 한글뜻 중앙정렬)
+          // 뒷면 (한글뜻 중앙정렬, 품사 상단 배치)
           const back = document.createElement("div");
           back.className = "card-face kor-face card-back";
           back.innerHTML = `
             <div class="star-icon ${isStarred ? 'starred' : ''}" onclick="toggleStar(event, '${item.en}')">
               ${isStarred ? '★' : '☆'}
             </div>
-            <div class="card-content-center">
-              ${item.pos ? `<span class="pos-badge">${item.pos}</span>` : ''}
+            ${item.pos ? `<div class="card-extra-top"><span class="pos-badge">${item.pos}</span></div>` : ''}
+            <div class="center-text-anchor">
               <div class="meaning">${item.ko}</div>
             </div>
           `;
