@@ -10,24 +10,36 @@
   <title>단어장</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    
+    /* 동적 폰트 크기 변수 (기본값) */
+    :root {
+      --word-size: 38px;
+      --meaning-size: 30px;
+    }
+
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f5f8; color: #222; }
 
-    /* 상단 헤더 네비게이션 바 */
+    /* 상단 헤더 */
     header {
       position: sticky; top: 0; background: #ffffff; border-bottom: 1px solid #e0e3eb;
-      display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; z-index: 100;
-      min-height: 62px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; z-index: 100;
+      min-height: 60px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);
     }
-    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .header-actions { display: flex; gap: 6px; align-items: center; }
     
     .header-btn {
-      background: #f0f2f6; border: 1.5px solid #dce0e8; font-size: 15px; font-weight: 700; color: #1c1c1e;
-      cursor: pointer; padding: 10px 14px; border-radius: 10px; display: inline-flex; align-items: center;
-      justify-content: center; transition: all 0.15s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      background: #f0f2f6; border: 1.5px solid #dce0e8; font-size: 14px; font-weight: 700; color: #1c1c1e;
+      cursor: pointer; padding: 8px 11px; border-radius: 9px; display: inline-flex; align-items: center;
+      justify-content: center; transition: all 0.15s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      user-select: none;
     }
-    .header-btn:active { background: #e2e5ec; transform: scale(0.96); }
+    .header-btn:active { background: #e2e5ec; transform: scale(0.95); }
     
     #back-btn { background: #f2f7ff; border-color: #cce1ff; color: #007aff; }
+
+    /* 폰트 조절 버튼 그룹 */
+    .font-ctrl-group { display: inline-flex; gap: 3px; }
+    .font-btn { padding: 8px 10px; font-size: 13px; }
 
     .header-btn.active {
       background: #ff9500; border-color: #e08300; color: #ffffff;
@@ -35,7 +47,7 @@
     }
 
     #header-title {
-      font-size: 19px; font-weight: 800; text-align: center; flex: 1; margin: 0 8px;
+      font-size: 17px; font-weight: 800; text-align: center; flex: 1; margin: 0 4px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #111;
     }
 
@@ -66,7 +78,6 @@
     /* 단어 카드 화면 */
     #word-study-view { display: none; padding: 18px 14px; flex-direction: column; align-items: center; gap: 18px; min-height: 80vh; }
     
-    /* 카드 높이 및 영역 확대 */
     .card-container { width: 100%; max-width: 440px; height: 195px; perspective: 1000px; }
     
     .card {
@@ -79,12 +90,12 @@
     .card-face {
       position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
       border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 20px 24px; text-align: center; border: 1.5px solid #e1e4ec;
+      padding: 16px 20px; text-align: center; border: 1.5px solid #e1e4ec;
     }
 
     /* 별표 버튼 */
     .star-icon {
-      position: absolute; top: 12px; right: 14px; font-size: 30px; line-height: 1;
+      position: absolute; top: 10px; right: 12px; font-size: 28px; line-height: 1;
       cursor: pointer; user-select: none; z-index: 10; padding: 4px;
     }
     .card-front .star-icon { color: #d1d5db; }
@@ -92,21 +103,21 @@
     .card-back .star-icon { color: rgba(255, 255, 255, 0.45); }
     .card-back .star-icon.starred { color: #ffd60a; }
 
-    /* 앞면: 단어 크기를 세로 높이의 절반 수준(38px~42px)으로 대폭 확대 */
+    /* 앞면: 단어 크기 가변 적용 */
     .card-front { background: #ffffff; color: #1c1c1e; }
     .card-front .word { 
-      font-size: 40px; font-weight: 800; line-height: 1.15; word-break: break-word; letter-spacing: -0.5px;
+      font-size: var(--word-size); font-weight: 800; line-height: 1.15; word-break: break-word; letter-spacing: -0.5px;
     }
-    .card-front .pron { font-size: 16px; color: #787d8a; margin-top: 8px; font-weight: 500; }
+    .card-front .pron { font-size: 15px; color: #787d8a; margin-top: 6px; font-weight: 500; }
 
-    /* 뒷면: 품사 배지와 함께 뜻 글자를 꽉 차게 확대(30px~34px) */
+    /* 뒷면: 뜻 크기 가변 적용 */
     .card-back { background: #007aff; color: #ffffff; transform: rotateY(180deg); }
     .card-back .pos-badge {
       display: inline-block; background: rgba(255, 255, 255, 0.28); color: #ffffff;
-      padding: 4px 12px; border-radius: 8px; font-size: 16px; font-weight: 700; margin-bottom: 8px;
+      padding: 3px 10px; border-radius: 7px; font-size: 15px; font-weight: 700; margin-bottom: 6px;
     }
     .card-back .meaning { 
-      font-size: 32px; font-weight: 800; line-height: 1.25; word-break: keep-all; letter-spacing: -0.5px;
+      font-size: var(--meaning-size); font-weight: 800; line-height: 1.25; word-break: keep-all; letter-spacing: -0.5px;
     }
 
     .empty-msg { text-align: center; padding: 70px 20px; font-size: 18px; font-weight: 600; color: #8e8e93; }
@@ -119,6 +130,11 @@
     <button id="back-btn" class="header-btn" style="display: none;" onclick="showPageList()">← 목록</button>
     <div id="header-title">단어장 선택</div>
     <div class="header-actions">
+      <!-- 글자 크기 조절 버튼 (가-, 가+) -->
+      <div id="font-ctrl" class="font-ctrl-group" style="display: none;">
+        <button class="header-btn font-btn" onclick="adjustFontSize(-1)">가-</button>
+        <button class="header-btn font-btn" onclick="adjustFontSize(1)">가+</button>
+      </div>
       <button id="star-filter-btn" class="header-btn" style="display: none;" onclick="toggleStarFilter()">★만 보기</button>
       <button id="shuffle-btn" class="header-btn" style="display: none;" onclick="shuffleCurrentWords()">셔플</button>
     </div>
@@ -138,6 +154,17 @@
     let isStarOnly = false;
     let isAllStarredMode = false;
 
+    // 글자 크기 단계 정의 (1단계 ~ 6단계)
+    const fontSizes = [
+      { word: "26px", meaning: "22px" },
+      { word: "32px", meaning: "26px" },
+      { word: "38px", meaning: "30px" }, // 기본값 (level 2)
+      { word: "44px", meaning: "34px" },
+      { word: "50px", meaning: "38px" },
+      { word: "56px", meaning: "42px" }
+    ];
+    let currentFontLevel = parseInt(localStorage.getItem('word_font_level') || '2', 10);
+
     let starredSet = new Set(JSON.parse(localStorage.getItem('starred_words') || '[]'));
 
     const pageListView = document.getElementById("page-selection-view");
@@ -146,6 +173,10 @@
     const backBtn = document.getElementById("back-btn");
     const shuffleBtn = document.getElementById("shuffle-btn");
     const starFilterBtn = document.getElementById("star-filter-btn");
+    const fontCtrl = document.getElementById("font-ctrl");
+
+    // 저장된 글자 크기 초기 반영
+    applyFontSize();
 
     fetch('./words.json?v=' + new Date().getTime())
       .then(res => {
@@ -159,6 +190,22 @@
       .catch(err => {
         pageListView.innerHTML = `<div id="loading-msg" style="color:#ff3b30;">words.json 파일을 불러오지 못했습니다.<br>경로와 내용을 확인해주세요.</div>`;
       });
+
+    // 글자 크기 적용 및 저장
+    function applyFontSize() {
+      const config = fontSizes[currentFontLevel];
+      document.documentElement.style.setProperty('--word-size', config.word);
+      document.documentElement.style.setProperty('--meaning-size', config.meaning);
+      localStorage.setItem('word_font_level', currentFontLevel);
+    }
+
+    // 버튼 클릭 시 글자 크기 증감
+    function adjustFontSize(delta) {
+      currentFontLevel += delta;
+      if (currentFontLevel < 0) currentFontLevel = 0;
+      if (currentFontLevel >= fontSizes.length) currentFontLevel = fontSizes.length - 1;
+      applyFontSize();
+    }
 
     function saveStarred() {
       localStorage.setItem('starred_words', JSON.stringify([...starredSet]));
@@ -236,6 +283,7 @@
       studyView.style.display = "flex";
       backBtn.style.display = "inline-flex";
       shuffleBtn.style.display = "inline-flex";
+      fontCtrl.style.display = "inline-flex"; // 글자 크기 조절 버튼 보이기
       starFilterBtn.style.display = isAllStarredMode ? "none" : "inline-flex";
       starFilterBtn.classList.remove("active");
       starFilterBtn.textContent = "★만 보기";
@@ -334,6 +382,7 @@
       backBtn.style.display = "none";
       shuffleBtn.style.display = "none";
       starFilterBtn.style.display = "none";
+      fontCtrl.style.display = "none"; // 메뉴 화면에서는 조절 버튼 숨김
       studyView.innerHTML = "";
       renderPageSelection();
     }
