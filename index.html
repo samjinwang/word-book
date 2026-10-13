@@ -20,6 +20,7 @@
       <div style="width: 50px;" id="header-spacer"></div>
     </div>
     <div class="header-actions" id="header-actions" style="display: none;">
+      <button id="lang-mode-btn" class="header-btn" onclick="toggleLangMode()">한→영</button>
       <button id="both-mode-btn" class="header-btn" onclick="toggleBothMode()">단어+뜻</button>
       <div id="font-ctrl" class="font-ctrl-group">
         <button class="header-btn font-btn" onclick="adjustFontSize(-1)">가-</button>
@@ -44,6 +45,7 @@
     let isStarOnly = false;
     let isAllStarredMode = false;
     let isBothMode = false;
+    let isKoreanFirst = false; // 기본값: 영어 앞면, 한글 뒷면
 
     const fontSizes = [
       { word: "26px", meaning: "22px", bWord: "22px", bMeaning: "19px" },
@@ -65,20 +67,24 @@
     const shuffleBtn = document.getElementById("shuffle-btn");
     const starFilterBtn = document.getElementById("star-filter-btn");
     const bothModeBtn = document.getElementById("both-mode-btn");
+    const langModeBtn = document.getElementById("lang-mode-btn");
 
     applyFontSize();
 
     // 단어 데이터 로드
     fetch('./words.json?v=' + new Date().getTime())
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("HTTP 상태 에러: " + res.status);
+        return res.json();
+      })
       .then(data => {
         wordData = data;
         renderPageSelection();
       })
       .catch(err => {
-      console.error("데이터 로드 실패 상세 원인:", err); // 콘솔에 구체적인 에러 출력
-      pageListView.innerHTML = `<div id="loading-msg" style="color:#ff3b30;">words.json 파일을 불러오지 못했습니다.</div>`;
-    });
+        console.error("데이터 로드 실패 원인:", err);
+        pageListView.innerHTML = `<div id="loading-msg" style="color:#ff3b30;">words.json 파일을 불러오지 못했습니다.</div>`;
+      });
 
     function applyFontSize() {
       const config = fontSizes[currentFontLevel];
@@ -177,9 +183,19 @@
       bothModeBtn.classList.remove("active");
       bothModeBtn.textContent = "단어+뜻";
 
+      langModeBtn.classList.toggle("active", isKoreanFirst);
+      langModeBtn.textContent = isKoreanFirst ? "영→한" : "한→영";
+
       starFilterBtn.style.display = isAllStarredMode ? "none" : "inline-flex";
       starFilterBtn.classList.remove("active");
       starFilterBtn.textContent = "★만 보기";
+    }
+
+    function toggleLangMode() {
+      isKoreanFirst = !isKoreanFirst;
+      langModeBtn.classList.toggle("active", isKoreanFirst);
+      langModeBtn.textContent = isKoreanFirst ? "영→한" : "한→영";
+      renderCards(displayWords);
     }
 
     function toggleBothMode() {
@@ -200,26 +216,42 @@
       words.forEach(item => {
         const isStarred = starredSet.has(item.en);
 
+        const starIconHtml = `
+          <div class="star-icon ${isStarred ? 'starred' : ''}" onclick="toggleStar(event, '${item.en}')">
+            ${isStarred ? '★' : '☆'}
+          </div>
+        `;
+
+        const engBody = `
+          <div class="center-text-anchor"><div class="word">${item.en}</div></div>
+          ${item.pron ? `<div class="card-extra-bottom"><div class="pron">${item.pron}</div></div>` : ''}
+        `;
+
+        const korBody = `
+          ${item.pos ? `<div class="card-extra-top"><span class="pos-badge">${item.pos}</span></div>` : ''}
+          <div class="center-text-anchor"><div class="meaning">${item.ko}</div></div>
+        `;
+
         if (isBothMode) {
           const rowContainer = document.createElement("div");
           rowContainer.className = "both-row-container";
 
           const leftCard = document.createElement("div");
-          leftCard.className = "side-card eng-face";
-          leftCard.innerHTML = `
-            <div class="star-icon ${isStarred ? 'starred' : ''}" onclick="toggleStar(event, '${item.en}')">
-              ${isStarred ? '★' : '☆'}
-            </div>
-            <div class="center-text-anchor"><div class="word">${item.en}</div></div>
-            ${item.pron ? `<div class="card-extra-bottom"><div class="pron">${item.pron}</div></div>` : ''}
-          `;
-
           const rightCard = document.createElement("div");
-          rightCard.className = "side-card kor-face";
-          rightCard.innerHTML = `
-            ${item.pos ? `<div class="card-extra-top"><span class="pos-badge">${item.pos}</span></div>` : ''}
-            <div class="center-text-anchor"><div class="meaning">${item.ko}</div></div>
-          `;
+
+          if (isKoreanFirst) {
+            leftCard.className = "side-card kor-face";
+            leftCard.innerHTML = starIconHtml + korBody;
+
+            rightCard.className = "side-card eng-face";
+            rightCard.innerHTML = engBody;
+          } else {
+            leftCard.className = "side-card eng-face";
+            leftCard.innerHTML = starIconHtml + engBody;
+
+            rightCard.className = "side-card kor-face";
+            rightCard.innerHTML = korBody;
+          }
 
           rowContainer.appendChild(leftCard);
           rowContainer.appendChild(rightCard);
@@ -233,24 +265,21 @@
           card.onclick = () => card.classList.toggle("flipped");
 
           const front = document.createElement("div");
-          front.className = "card-face eng-face card-front";
-          front.innerHTML = `
-            <div class="star-icon ${isStarred ? 'starred' : ''}" onclick="toggleStar(event, '${item.en}')">
-              ${isStarred ? '★' : '☆'}
-            </div>
-            <div class="center-text-anchor"><div class="word">${item.en}</div></div>
-            ${item.pron ? `<div class="card-extra-bottom"><div class="pron">${item.pron}</div></div>` : ''}
-          `;
-
           const back = document.createElement("div");
-          back.className = "card-face kor-face card-back";
-          back.innerHTML = `
-            <div class="star-icon ${isStarred ? 'starred' : ''}" onclick="toggleStar(event, '${item.en}')">
-              ${isStarred ? '★' : '☆'}
-            </div>
-            ${item.pos ? `<div class="card-extra-top"><span class="pos-badge">${item.pos}</span></div>` : ''}
-            <div class="center-text-anchor"><div class="meaning">${item.ko}</div></div>
-          `;
+
+          if (isKoreanFirst) {
+            front.className = "card-face kor-face card-front";
+            front.innerHTML = starIconHtml + korBody;
+
+            back.className = "card-face eng-face card-back";
+            back.innerHTML = starIconHtml + engBody;
+          } else {
+            front.className = "card-face eng-face card-front";
+            front.innerHTML = starIconHtml + engBody;
+
+            back.className = "card-face kor-face card-back";
+            back.innerHTML = starIconHtml + korBody;
+          }
 
           card.appendChild(front);
           card.appendChild(back);
