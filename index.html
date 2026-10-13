@@ -76,8 +76,9 @@
         renderPageSelection();
       })
       .catch(err => {
-        pageListView.innerHTML = `<div id="loading-msg" style="color:#ff3b30;">words.json 파일을 불러오지 못했습니다.</div>`;
-      });
+      console.error("데이터 로드 실패 상세 원인:", err); // 콘솔에 구체적인 에러 출력
+      pageListView.innerHTML = `<div id="loading-msg" style="color:#ff3b30;">words.json 파일을 불러오지 못했습니다.</div>`;
+    });
 
     function applyFontSize() {
       const config = fontSizes[currentFontLevel];
