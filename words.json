@@ -338,7 +338,7 @@
     { "en": "connection", "pron": "[kənékʃən]", "pos": "n.", "ko": "접속, 연결" },
     { "en": "please", "pron": "[pli:z]", "pos": "v.", "ko": "기쁘게 하다" },
     { "en": "pleasurable", "pron": "[pléʒərəbl]", "pos": "adj.", "ko": "즐거운, 유쾌한" },
-    { "en": "enforce", "pron": "[infɔ́:rs]", "pos": "v.", "(법률 등을) 시행하다" },
+    { "en": "enforce", "pron": "[infɔ́:rs]", "pos": "v.", "ko": "(법률 등을) 시행하다" },
     { "en": "escort", "pron": "[iskɔ́:rt]", "pos": "v.", "ko": "수행하다, 동행하다" },
     { "en": "tax code", "pron": "", "pos": "phr.", "ko": "세법" },
     { "en": "planning", "pron": "[plǽniŋ]", "pos": "n.", "ko": "계획, 입안" },
