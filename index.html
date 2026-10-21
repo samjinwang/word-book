@@ -10,34 +10,149 @@
   <title>단어장</title>
   <!-- 분리된 스타일 파일 연결 -->
   <link rel="stylesheet" href="./style.css">
+  <style>
+    /* 최상위 메인 메뉴 화면 스타일 */
+    .main-menu-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 20px 16px;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .menu-card {
+      background: #ffffff;
+      border: 1px solid #e5e5ea;
+      border-radius: 16px;
+      padding: 24px 20px;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .menu-card:active {
+      transform: scale(0.98);
+      background-color: #f7f7f9;
+    }
+    .menu-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .menu-card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1c1c1e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .menu-card-desc {
+      font-size: 14px;
+      color: #8e8e93;
+      line-height: 1.4;
+    }
+    .menu-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #f2f2f7;
+      color: #007aff;
+    }
+    /* 회화 카드 전용 배지 스타일 */
+    .convo-badge-step1 {
+      background: #e3f2fd !important;
+      color: #0071e3 !important;
+    }
+    .convo-badge-step2 {
+      background: #e8f5e9 !important;
+      color: #2e7d32 !important;
+    }
+    .convo-badge-step3 {
+      background: #fff3e0 !important;
+      color: #e65100 !important;
+    }
+    .card-hint {
+      font-size: 13px;
+      color: #8e8e93;
+      margin-top: 4px;
+    }
+  </style>
 </head>
 <body>
 
   <header>
     <div class="header-top">
-      <button id="back-btn" class="header-btn" style="display: none;" onclick="showPageList()">← 목록</button>
-      <div id="header-title">단어장 선택</div>
+      <button id="back-btn" class="header-btn" style="display: none;" onclick="handleBackAction()">←</button>
+      <div id="header-title">단어장 홈</div>
       <div style="width: 50px;" id="header-spacer"></div>
     </div>
-    <div class="header-actions" id="header-actions" style="display: none;">
+
+    <!-- 1번 기존 단어장 액션 바 -->
+    <div class="header-actions" id="classic-header-actions" style="display: none;">
       <button id="lang-mode-btn" class="header-btn" onclick="toggleLangMode()">한→영</button>
       <button id="both-mode-btn" class="header-btn" onclick="toggleBothMode()">단어+뜻</button>
-      <div id="font-ctrl" class="font-ctrl-group">
+      <div class="font-ctrl-group">
         <button class="header-btn font-btn" onclick="adjustFontSize(-1)">가-</button>
         <button class="header-btn font-btn" onclick="adjustFontSize(1)">가+</button>
       </div>
       <button id="star-filter-btn" class="header-btn" onclick="toggleStarFilter()">★만 보기</button>
       <button id="shuffle-btn" class="header-btn" onclick="shuffleCurrentWords()">셔플</button>
     </div>
+
+    <!-- 2번 회화단어 전용 액션 바 -->
+    <div class="header-actions" id="convo-header-actions" style="display: none;">
+      <button id="convo-meaning-btn" class="header-btn" onclick="toggleConvoMeaningMode()">한글뜻 보기</button>
+      <div class="font-ctrl-group">
+        <button class="header-btn font-btn" onclick="adjustFontSize(-1)">가-</button>
+        <button class="header-btn font-btn" onclick="adjustFontSize(1)">가+</button>
+      </div>
+      <button id="convo-star-filter-btn" class="header-btn" onclick="toggleConvoStarFilter()">★만 보기</button>
+      <button id="convo-shuffle-btn" class="header-btn" onclick="shuffleConvoWords()">셔플</button>
+    </div>
   </header>
 
-  <main id="page-selection-view">
+  <!-- 0. 최상위 메인 메뉴 뷰 -->
+  <main id="main-menu-view">
+    <div class="main-menu-container">
+      <div class="menu-card" onclick="openClassicWordbook()">
+        <div class="menu-card-header">
+          <div class="menu-card-title">📚 주제별 단어장</div>
+          <span class="menu-badge" id="classic-total-badge">로딩중</span>
+        </div>
+        <div class="menu-card-desc">1일차~4일차 및 SPA 1~20일차 단어를 일차별로 집중 암기합니다. (words.json)</div>
+      </div>
+
+      <div class="menu-card" onclick="openConvoWordbook()">
+        <div class="menu-card-header">
+          <div class="menu-card-title">🗣️ 회화단어 세트</div>
+          <span class="menu-badge" id="convo-total-badge" style="background:#e8f5e9; color:#2e7d32;">100세트</span>
+        </div>
+        <div class="menu-card-desc">기본 표현(단어1) ➔ 패러프레이징(단어2) ➔ 한글 뜻으로 이어지는 SPA 회화 실전 표현입니다. (words2.json)</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 1. 기존 단어장 일차 선택 뷰 -->
+  <main id="page-selection-view" style="display: none;">
     <div id="loading-msg">단어 목록을 불러오는 중...</div>
   </main>
 
-  <main id="word-study-view"></main>
+  <!-- 2. 단어 학습 뷰 (공용) -->
+  <main id="word-study-view" style="display: none;"></main>
 
   <script>
+    // --- 상태 관리 ---
+    let currentView = "main-menu"; // "main-menu" | "page-selection" | "classic-study" | "convo-study"
+    
+    // 1번 단어장 데이터
     let wordData = {};
     let currentPageKey = null;
     let baseWords = [];
@@ -45,7 +160,16 @@
     let isStarOnly = false;
     let isAllStarredMode = false;
     let isBothMode = false;
-    let isKoreanFirst = false; // 기본값: 영어 앞면, 한글 뒷면
+    let isKoreanFirst = false;
+    let starredSet = new Set(JSON.parse(localStorage.getItem('starred_words') || '[]'));
+
+    // 2번 회화단어 데이터
+    let convoWords = [];
+    let baseConvoWords = [];
+    let displayConvoWords = [];
+    let isConvoMeaningMode = false; // 한글뜻 보기 토글 여부
+    let isConvoStarOnly = false;
+    let convoStarredSet = new Set(JSON.parse(localStorage.getItem('convo_starred_words') || '[]'));
 
     const fontSizes = [
       { word: "26px", meaning: "22px", bWord: "22px", bMeaning: "19px" },
@@ -56,36 +180,58 @@
       { word: "60px", meaning: "46px", bWord: "49px", bMeaning: "41px" }
     ];
     let currentFontLevel = parseInt(localStorage.getItem('word_font_level') || '2', 10);
-    let starredSet = new Set(JSON.parse(localStorage.getItem('starred_words') || '[]'));
 
+    // DOM 요소
+    const mainMenuView = document.getElementById("main-menu-view");
     const pageListView = document.getElementById("page-selection-view");
     const studyView = document.getElementById("word-study-view");
     const headerTitle = document.getElementById("header-title");
-    const headerActions = document.getElementById("header-actions");
     const headerSpacer = document.getElementById("header-spacer");
     const backBtn = document.getElementById("back-btn");
-    const shuffleBtn = document.getElementById("shuffle-btn");
-    const starFilterBtn = document.getElementById("star-filter-btn");
-    const bothModeBtn = document.getElementById("both-mode-btn");
+
+    const classicHeaderActions = document.getElementById("classic-header-actions");
     const langModeBtn = document.getElementById("lang-mode-btn");
+    const bothModeBtn = document.getElementById("both-mode-btn");
+    const starFilterBtn = document.getElementById("star-filter-btn");
+
+    const convoHeaderActions = document.getElementById("convo-header-actions");
+    const convoMeaningBtn = document.getElementById("convo-meaning-btn");
+    const convoStarFilterBtn = document.getElementById("convo-star-filter-btn");
 
     applyFontSize();
 
-    // 단어 데이터 로드
+    // 1. words.json 로드
     fetch('./words.json?v=' + new Date().getTime())
       .then(res => {
-        if (!res.ok) throw new Error("HTTP 상태 에러: " + res.status);
+        if (!res.ok) throw new Error("HTTP error " + res.status);
         return res.json();
       })
       .then(data => {
         wordData = data;
-        renderPageSelection();
+        let count = 0;
+        Object.values(data).forEach(list => count += list.length);
+        document.getElementById("classic-total-badge").textContent = `${count}단어`;
       })
       .catch(err => {
-        console.error("데이터 로드 실패 원인:", err);
-        pageListView.innerHTML = `<div id="loading-msg" style="color:#ff3b30;">words.json 파일을 불러오지 못했습니다.</div>`;
+        console.error("words.json 로드 실패:", err);
+        document.getElementById("classic-total-badge").textContent = "오류";
       });
 
+    // 2. words2.json 로드
+    fetch('./words2.json?v=' + new Date().getTime())
+      .then(res => {
+        if (!res.ok) throw new Error("HTTP error " + res.status);
+        return res.json();
+      })
+      .then(data => {
+        convoWords = data;
+        document.getElementById("convo-total-badge").textContent = `${convoWords.length}세트`;
+      })
+      .catch(err => {
+        console.error("words2.json 로드 실패:", err);
+      });
+
+    // 폰트 크기 적용
     function applyFontSize() {
       const config = fontSizes[currentFontLevel];
       document.documentElement.style.setProperty('--word-size', config.word);
@@ -102,8 +248,51 @@
       applyFontSize();
     }
 
-    function saveStarred() {
-      localStorage.setItem('starred_words', JSON.stringify([...starredSet]));
+    // ---------------- [네비게이션 제어] ----------------
+    function showMainMenu() {
+      currentView = "main-menu";
+      headerTitle.textContent = "단어장 홈";
+      backBtn.style.display = "none";
+      headerSpacer.style.display = "block";
+      classicHeaderActions.style.display = "none";
+      convoHeaderActions.style.display = "none";
+
+      mainMenuView.style.display = "flex";
+      pageListView.style.display = "none";
+      studyView.style.display = "none";
+      studyView.innerHTML = "";
+    }
+
+    function handleBackAction() {
+      if (currentView === "page-selection" || currentView === "convo-study") {
+        showMainMenu();
+      } else if (currentView === "classic-study") {
+        showPageList();
+      }
+    }
+
+    // ---------------- [1. 기존 단어장 모드] ----------------
+    function openClassicWordbook() {
+      showPageList();
+    }
+
+    function showPageList() {
+      currentView = "page-selection";
+      currentPageKey = null;
+      isBothMode = false;
+      headerTitle.textContent = "단어장 선택";
+      backBtn.style.display = "inline-flex";
+      backBtn.textContent = "← 메인";
+      headerSpacer.style.display = "none";
+      classicHeaderActions.style.display = "none";
+      convoHeaderActions.style.display = "none";
+
+      mainMenuView.style.display = "none";
+      pageListView.style.display = "flex";
+      studyView.style.display = "none";
+      studyView.innerHTML = "";
+
+      renderPageSelection();
     }
 
     function renderPageSelection() {
@@ -132,14 +321,15 @@
         const btn = document.createElement("button");
         btn.className = "page-btn";
         btn.innerHTML = `${pageKey} <span class="count">${wordData[pageKey].length}단어</span>`;
-        btn.onclick = () => loadPage(pageKey);
+        btn.onclick = () => loadClassicPage(pageKey);
         grid.appendChild(btn);
       });
 
       pageListView.appendChild(grid);
     }
 
-    function loadPage(pageKey) {
+    function loadClassicPage(pageKey) {
+      currentView = "classic-study";
       currentPageKey = pageKey;
       isAllStarredMode = false;
       isStarOnly = false;
@@ -147,12 +337,13 @@
       baseWords = [...wordData[pageKey]];
       displayWords = [...baseWords];
 
-      updateHeader(pageKey);
-      renderCards(displayWords);
+      updateClassicHeader(pageKey);
+      renderClassicCards(displayWords);
       window.scrollTo(0, 0);
     }
 
     function loadAllStarred() {
+      currentView = "classic-study";
       currentPageKey = "별표 모아보기";
       isAllStarredMode = true;
       isStarOnly = true;
@@ -166,19 +357,22 @@
       });
       displayWords = [...baseWords];
 
-      updateHeader("★ 별표 모아보기");
+      updateClassicHeader("★ 별표 모아보기");
       starFilterBtn.style.display = "none";
-      renderCards(displayWords);
+      renderClassicCards(displayWords);
       window.scrollTo(0, 0);
     }
 
-    function updateHeader(title) {
+    function updateClassicHeader(title) {
       headerTitle.textContent = title;
+      mainMenuView.style.display = "none";
       pageListView.style.display = "none";
       studyView.style.display = "flex";
       backBtn.style.display = "inline-flex";
+      backBtn.textContent = "← 목록";
       headerSpacer.style.display = "none";
-      headerActions.style.display = "flex";
+      classicHeaderActions.style.display = "flex";
+      convoHeaderActions.style.display = "none";
 
       bothModeBtn.classList.remove("active");
       bothModeBtn.textContent = "단어+뜻";
@@ -195,17 +389,48 @@
       isKoreanFirst = !isKoreanFirst;
       langModeBtn.classList.toggle("active", isKoreanFirst);
       langModeBtn.textContent = isKoreanFirst ? "영→한" : "한→영";
-      renderCards(displayWords);
+      renderClassicCards(displayWords);
     }
 
     function toggleBothMode() {
       isBothMode = !isBothMode;
       bothModeBtn.classList.toggle("active", isBothMode);
       bothModeBtn.textContent = isBothMode ? "뒤집기 모드" : "단어+뜻";
-      renderCards(displayWords);
+      renderClassicCards(displayWords);
     }
 
-    function renderCards(words) {
+    function toggleStarFilter() {
+      isStarOnly = !isStarOnly;
+      starFilterBtn.classList.toggle("active", isStarOnly);
+      starFilterBtn.textContent = isStarOnly ? "전체보기" : "★만 보기";
+      displayWords = isStarOnly ? baseWords.filter(item => starredSet.has(item.en)) : [...baseWords];
+      renderClassicCards(displayWords);
+    }
+
+    function shuffleCurrentWords() {
+      for (let i = displayWords.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [displayWords[i], displayWords[j]] = [displayWords[j], displayWords[i]];
+      }
+      renderClassicCards(displayWords);
+    }
+
+    function toggleStar(event, wordEn) {
+      event.stopPropagation();
+      if (starredSet.has(wordEn)) {
+        starredSet.delete(wordEn);
+      } else {
+        starredSet.add(wordEn);
+      }
+      localStorage.setItem('starred_words', JSON.stringify([...starredSet]));
+
+      if (isStarOnly) {
+        displayWords = displayWords.filter(item => starredSet.has(item.en));
+      }
+      renderClassicCards(displayWords);
+    }
+
+    function renderClassicCards(words) {
       studyView.innerHTML = "";
 
       if (words.length === 0) {
@@ -215,18 +440,15 @@
 
       words.forEach(item => {
         const isStarred = starredSet.has(item.en);
-
         const starIconHtml = `
           <div class="star-icon ${isStarred ? 'starred' : ''}" onclick="toggleStar(event, '${item.en}')">
             ${isStarred ? '★' : '☆'}
           </div>
         `;
-
         const engBody = `
           <div class="center-text-anchor"><div class="word">${item.en}</div></div>
           ${item.pron ? `<div class="card-extra-bottom"><div class="pron">${item.pron}</div></div>` : ''}
         `;
-
         const korBody = `
           ${item.pos ? `<div class="card-extra-top"><span class="pos-badge">${item.pos}</span></div>` : ''}
           <div class="center-text-anchor"><div class="meaning">${item.ko}</div></div>
@@ -235,31 +457,26 @@
         if (isBothMode) {
           const rowContainer = document.createElement("div");
           rowContainer.className = "both-row-container";
-
           const leftCard = document.createElement("div");
           const rightCard = document.createElement("div");
 
           if (isKoreanFirst) {
             leftCard.className = "side-card kor-face";
             leftCard.innerHTML = starIconHtml + korBody;
-
             rightCard.className = "side-card eng-face";
             rightCard.innerHTML = engBody;
           } else {
             leftCard.className = "side-card eng-face";
             leftCard.innerHTML = starIconHtml + engBody;
-
             rightCard.className = "side-card kor-face";
             rightCard.innerHTML = korBody;
           }
-
           rowContainer.appendChild(leftCard);
           rowContainer.appendChild(rightCard);
           studyView.appendChild(rowContainer);
         } else {
           const container = document.createElement("div");
           container.className = "flip-container";
-
           const card = document.createElement("div");
           card.className = "card";
           card.onclick = () => card.classList.toggle("flipped");
@@ -270,17 +487,14 @@
           if (isKoreanFirst) {
             front.className = "card-face kor-face card-front";
             front.innerHTML = starIconHtml + korBody;
-
             back.className = "card-face eng-face card-back";
             back.innerHTML = starIconHtml + engBody;
           } else {
             front.className = "card-face eng-face card-front";
             front.innerHTML = starIconHtml + engBody;
-
             back.className = "card-face kor-face card-back";
             back.innerHTML = starIconHtml + korBody;
           }
-
           card.appendChild(front);
           card.appendChild(back);
           container.appendChild(card);
@@ -289,50 +503,190 @@
       });
     }
 
-    function toggleStar(event, wordEn) {
-      event.stopPropagation();
-      if (starredSet.has(wordEn)) {
-        starredSet.delete(wordEn);
-      } else {
-        starredSet.add(wordEn);
-      }
-      saveStarred();
+    // ---------------- [2. 회화단어 세트 모드] ----------------
+    function openConvoWordbook() {
+      currentView = "convo-study";
+      isConvoMeaningMode = false;
+      isConvoStarOnly = false;
+      baseConvoWords = [...convoWords];
+      displayConvoWords = [...baseConvoWords];
 
-      if (isStarOnly) {
-        displayWords = displayWords.filter(item => starredSet.has(item.en));
-        renderCards(displayWords);
-      } else {
-        renderCards(displayWords);
-      }
+      headerTitle.textContent = "회화단어 세트";
+      backBtn.style.display = "inline-flex";
+      backBtn.textContent = "← 메인";
+      headerSpacer.style.display = "none";
+      classicHeaderActions.style.display = "none";
+      convoHeaderActions.style.display = "flex";
+
+      convoMeaningBtn.classList.remove("active");
+      convoMeaningBtn.textContent = "한글뜻 보기";
+      convoStarFilterBtn.classList.remove("active");
+      convoStarFilterBtn.textContent = "★만 보기";
+
+      mainMenuView.style.display = "none";
+      pageListView.style.display = "none";
+      studyView.style.display = "flex";
+
+      renderConvoCards(displayConvoWords);
+      window.scrollTo(0, 0);
     }
 
-    function toggleStarFilter() {
-      isStarOnly = !isStarOnly;
-      starFilterBtn.classList.toggle("active", isStarOnly);
-      starFilterBtn.textContent = isStarOnly ? "전체보기" : "★만 보기";
-      displayWords = isStarOnly ? baseWords.filter(item => starredSet.has(item.en)) : [...baseWords];
-      renderCards(displayWords);
+    function toggleConvoMeaningMode() {
+      isConvoMeaningMode = !isConvoMeaningMode;
+      convoMeaningBtn.classList.toggle("active", isConvoMeaningMode);
+      convoMeaningBtn.textContent = isConvoMeaningMode ? "한글뜻 끄기" : "한글뜻 보기";
+      renderConvoCards(displayConvoWords);
     }
 
-    function shuffleCurrentWords() {
-      for (let i = displayWords.length - 1; i > 0; i--) {
+    function toggleConvoStarFilter() {
+      isConvoStarOnly = !isConvoStarOnly;
+      convoStarFilterBtn.classList.toggle("active", isConvoStarOnly);
+      convoStarFilterBtn.textContent = isConvoStarOnly ? "전체보기" : "★만 보기";
+
+      displayConvoWords = isConvoStarOnly
+        ? baseConvoWords.filter(item => convoStarredSet.has(getConvoKey(item)))
+        : [...baseConvoWords];
+      renderConvoCards(displayConvoWords);
+    }
+
+    function shuffleConvoWords() {
+      for (let i = displayConvoWords.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [displayWords[i], displayWords[j]] = [displayWords[j], displayWords[i]];
+        [displayConvoWords[i], displayConvoWords[j]] = [displayConvoWords[j], displayConvoWords[i]];
       }
-      renderCards(displayWords);
+      renderConvoCards(displayConvoWords);
     }
 
-    function showPageList() {
-      currentPageKey = null;
-      isBothMode = false;
-      headerTitle.textContent = "단어장 선택";
-      pageListView.style.display = "flex";
-      studyView.style.display = "none";
-      backBtn.style.display = "none";
-      headerActions.style.display = "none";
-      headerSpacer.style.display = "block";
+    function getConvoKey(item) {
+      return item.word1 + "||" + item.word2;
+    }
+
+    function toggleConvoStar(event, item) {
+      event.stopPropagation();
+      const key = getConvoKey(item);
+      if (convoStarredSet.has(key)) {
+        convoStarredSet.delete(key);
+      } else {
+        convoStarredSet.add(key);
+      }
+      localStorage.setItem('convo_starred_words', JSON.stringify([...convoStarredSet]));
+
+      if (isConvoStarOnly) {
+        displayConvoWords = displayConvoWords.filter(it => convoStarredSet.has(getConvoKey(it)));
+      }
+      renderConvoCards(displayConvoWords);
+    }
+
+    // 회화 카드 페이스 템플릿 생성기
+    function getConvoFaceHtml(item, step, isStarred) {
+      const starHtml = `
+        <div class="star-icon ${isStarred ? 'starred' : ''}" onclick="toggleConvoStar(event, ${JSON.stringify(item).replace(/"/g, '&quot;')})">
+          ${isStarred ? '★' : '☆'}
+        </div>
+      `;
+
+      if (step === 1) {
+        return `
+          ${starHtml}
+          <div class="card-extra-top"><span class="pos-badge convo-badge-step1">기본 표현</span></div>
+          <div class="center-text-anchor"><div class="word">${item.word1}</div></div>
+          <div class="card-extra-bottom"><div class="card-hint">탭하여 대체 표현 보기 →</div></div>
+        `;
+      } else if (step === 2) {
+        const nextHint = isConvoMeaningMode ? "탭하여 한글 뜻 보기 →" : "탭하여 기본 표현으로 →";
+        return `
+          ${starHtml}
+          <div class="card-extra-top"><span class="pos-badge convo-badge-step2">패러프레이징</span></div>
+          <div class="center-text-anchor"><div class="word">${item.word2}</div></div>
+          <div class="card-extra-bottom"><div class="card-hint">${nextHint}</div></div>
+        `;
+      } else {
+        return `
+          ${starHtml}
+          <div class="card-extra-top"><span class="pos-badge convo-badge-step3">한글 뜻</span></div>
+          <div class="center-text-anchor"><div class="meaning">${item.meaning}</div></div>
+          <div class="card-extra-bottom"><div class="card-hint">탭하여 기본 표현으로 →</div></div>
+        `;
+      }
+    }
+
+    // 회화 카드 렌더링 및 2단/3단 순환 플립 처리
+    function renderConvoCards(words) {
       studyView.innerHTML = "";
-      renderPageSelection();
+
+      if (words.length === 0) {
+        studyView.innerHTML = `<div class="empty-msg">별표 친 회화 표현이 없습니다.</div>`;
+        return;
+      }
+
+      words.forEach(item => {
+        const isStarred = convoStarredSet.has(getConvoKey(item));
+
+        const container = document.createElement("div");
+        container.className = "flip-container";
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const front = document.createElement("div");
+        front.className = "card-face eng-face card-front";
+        front.innerHTML = getConvoFaceHtml(item, 1, isStarred);
+
+        const back = document.createElement("div");
+        back.className = "card-face eng-face card-back";
+        back.innerHTML = getConvoFaceHtml(item, 2, isStarred);
+
+        card.appendChild(front);
+        card.appendChild(back);
+        container.appendChild(card);
+        studyView.appendChild(container);
+
+        // 플립 상태 추적 (state: 0 = 단어1, 1 = 단어2, 2 = 뜻)
+        let state = 0;
+        let isFlipped = false;
+
+        card.onclick = () => {
+          if (!isConvoMeaningMode) {
+            // [기본 2단 플립 모드]: 단어1 ↔ 단어2
+            isFlipped = !isFlipped;
+            card.classList.toggle("flipped", isFlipped);
+            state = isFlipped ? 1 : 0;
+          } else {
+            // [3단 순환 플립 모드]: 단어1 ➔ 단어2 ➔ 한글뜻 ➔ 단어1
+            if (state === 0) {
+              // 0(단어1, 앞면) -> 1(단어2, 뒷면)
+              isFlipped = true;
+              card.classList.add("flipped");
+              state = 1;
+              // 뒷면으로 회전하는 동안(안 보이는 상태) 앞면을 '한글뜻'으로 선제 준비
+              setTimeout(() => {
+                front.className = "card-face kor-face card-front";
+                front.innerHTML = getConvoFaceHtml(item, 3, convoStarredSet.has(getConvoKey(item)));
+              }, 200);
+            } else if (state === 1) {
+              // 1(단어2, 뒷면) -> 2(한글뜻, 앞면)
+              isFlipped = false;
+              card.classList.remove("flipped");
+              state = 2;
+              // 앞면으로 회전하는 동안 뒷면을 다시 '단어1'로 선제 준비
+              setTimeout(() => {
+                back.className = "card-face eng-face card-back";
+                back.innerHTML = getConvoFaceHtml(item, 1, convoStarredSet.has(getConvoKey(item)));
+              }, 200);
+            } else if (state === 2) {
+              // 2(한글뜻, 앞면) -> 0(단어1, 뒷면)
+              isFlipped = true;
+              card.classList.add("flipped");
+              state = 0;
+              // 뒷면으로 회전하는 동안 앞면을 '단어2'로 선제 준비
+              setTimeout(() => {
+                front.className = "card-face eng-face card-front";
+                front.innerHTML = getConvoFaceHtml(item, 2, convoStarredSet.has(getConvoKey(item)));
+              }, 200);
+            }
+          }
+        };
+      });
     }
   </script>
 </body>
